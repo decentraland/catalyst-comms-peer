@@ -1,0 +1,48 @@
+{
+  "name": "@dcl/catalyst-comms-peer",
+  "version": "1.0.0-experimental.1",
+  "description": "Catalyst Peer Library",
+  "main": "dist/index.js",
+  "scripts": {
+    "prebuild": "rm -rf dist",
+    "test": "$npm_execpath run build-with-tests && karma start karma.conf.js --single-run",
+    "build": "tsc --project tsconfig-build.json",
+    "watch": "tsc --watch --project tsconfig-build.json",
+    "build-with-tests": "rm -rf dist && tsc",
+    "lint:fix": "eslint '**/*.{js,ts,tsx}' --quiet --fix",
+    "lint:check": "eslint '**/*.{js,ts,tsx}' --quiet"
+  },
+  "author": "dcl",
+  "license": "MIT",
+  "dependencies": {
+    "eventemitter3": "^4.0.7",
+    "fp-future": "^1.0.1",
+    "protobufjs": "^6.11.2",
+    "simple-peer": "^9.11.0"
+  },
+  "devDependencies": {
+    "@types/jasmine": "^3.7.7",
+    "@types/simple-peer": "^9.11.0",
+    "@typescript-eslint/eslint-plugin": "^4.28.1",
+    "@typescript-eslint/parser": "^4.28.1",
+    "browserify": "^17.0.0",
+    "eslint": "^7.29.0",
+    "eslint-config-prettier": "^8.3.0",
+    "eslint-plugin-prettier": "^3.4.0",
+    "karma": "^6.3.4",
+    "karma-browserify": "^8.0.0",
+    "karma-chrome-launcher": "^3.1.0",
+    "karma-jasmine": "^4.0.1",
+    "prettier": "^2.3.2",
+    "puppeteer": "^10.1.0",
+    "requirejs": "^2.3.6",
+    "typescript": "^4.3.5",
+    "watchify": "^4.0.0"
+  },
+  "prettier": {
+    "semi": false,
+    "singleQuote": true,
+    "printWidth": 120,
+    "trailingComma": "none"
+  } 
+}

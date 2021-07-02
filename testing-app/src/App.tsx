@@ -1,7 +1,7 @@
 import { Center } from 'decentraland-ui'
 import React from 'react'
 import ReactDOM from 'react-dom'
-import { Peer } from '../peer/src/Peer'
+import { Peer } from '../../src/Peer'
 import { Chat } from './components/Chat'
 import { ConnectForm } from './components/ConnectForm'
 

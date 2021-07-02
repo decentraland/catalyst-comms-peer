@@ -1,7 +1,7 @@
 import { Button, Radio } from 'decentraland-ui'
 import React, { useEffect, useRef, useState } from 'react'
-import { Peer } from '../../peer/src'
-import { PeerMessageTypes } from '../../peer/src/messageTypes'
+import { Peer } from '../../../src'
+import { PeerMessageTypes } from '../../../src/messageTypes'
 import { mouse } from './Mouse'
 
 type Message = {

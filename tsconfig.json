@@ -19,7 +19,8 @@
     "incremental": true,
     "emitDecoratorMetadata": true,
     "noUnusedLocals": true,
-    "plugins": [{ "name": "tslint-language-service" }]
+    "plugins": [{ "name": "tslint-language-service" }],
+    "declaration": true
   },
   "exclude": ["node_modules", "dist", "testing-app"]
 }

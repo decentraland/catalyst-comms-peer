@@ -1,7 +1,7 @@
 import { Button, Radio } from 'decentraland-ui'
 import React, { useEffect, useRef, useState } from 'react'
-import { Peer } from '../../../src'
-import { PeerMessageTypes } from '../../../src/messageTypes'
+import { Peer } from '@dcl/catalyst-comms-peer'
+import { PeerMessageTypes } from '@dcl/catalyst-comms-peer'
 import { mouse } from './Mouse'
 
 type Message = {
@@ -57,7 +57,7 @@ export function Chat(props: { peer: Peer; room: string; url: string }) {
   const [messages, setMessages] = useState<Record<string, Message[]>>({})
   const [message, setMessage] = useState('')
   const [cursors, setCursors] = useState<Record<string, Cursor>>({})
-  const [updatingCursors, setUpdatingCursors] = useState(!!new URLSearchParams(location.search).get('updatingCursors'))
+  const [updatingCursors, setUpdatingCursors] = useState(!!new URLSearchParams(window.location.search).get('updatingCursors'))
   const [currentRoom, setCurrentRoom] = useState(props.room)
   const [availableRooms, setAvailableRooms] = useState([])
   const [joinedRooms, setJoinedRooms] = useState([...props.peer.currentRooms])

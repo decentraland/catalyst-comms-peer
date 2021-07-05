@@ -1,4 +1,4 @@
-import { util } from '../../../src/peerjs-server-connector/util'
+import { util } from '@dcl/catalyst-comms-peer/dist/peerjs-server-connector/util'
 
 export const PeerToken = {
   getToken(peerId: string): string {

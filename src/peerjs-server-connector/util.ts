@@ -13,7 +13,7 @@ import { DEFAULT_ID_ALPHABET } from '../utils/util'
 // };
 
 export const util = new (class {
-  noop(): void {}
+  noop(): void { }
 
   readonly CLOUD_HOST = '0.peerjs.com'
   readonly CLOUD_PORT = 443

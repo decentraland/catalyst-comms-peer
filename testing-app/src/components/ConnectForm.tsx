@@ -1,8 +1,8 @@
 import { Button, Field } from 'decentraland-ui'
 import React, { useEffect, useState } from 'react'
-import { discretizedPositionDistanceXZ } from '../../../src/utils/Positions'
-import { Peer } from '../../../src'
-import { util } from '../../../src/peerjs-server-connector/util'
+import { discretizedPositionDistanceXZ } from '@dcl/catalyst-comms-peer'
+import { Peer } from '@dcl/catalyst-comms-peer'
+import { util } from '@dcl/catalyst-comms-peer/dist/peerjs-server-connector/util'
 import { mouse } from './Mouse'
 import { PeerToken } from './PeerToken'
 

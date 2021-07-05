@@ -1,7 +1,7 @@
 import { Button, Radio } from 'decentraland-ui'
 import React, { useEffect, useRef, useState } from 'react'
-import { Peer } from '@dcl/catalyst-comms-peer'
-import { PeerMessageTypes } from '@dcl/catalyst-comms-peer'
+import { Peer } from '@dcl/catalyst-peer'
+import { PeerMessageTypes } from '@dcl/catalyst-peer'
 import { mouse } from './Mouse'
 
 type Message = {

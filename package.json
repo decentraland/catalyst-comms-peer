@@ -1,6 +1,6 @@
 {
   "name": "@dcl/catalyst-peer",
-  "version": "1.0.0-experimental.1",
+  "version": "1.0.0-experimental.2",
   "description": "Catalyst Peer Library",
   "main": "dist/index.js",
   "typings": "./dist/index.d.ts",

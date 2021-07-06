@@ -1,4 +1,4 @@
-import Long from "long"
+import Long from 'long'
 
 if (window && !window.Long) {
   window.Long = Long

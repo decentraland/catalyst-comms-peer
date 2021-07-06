@@ -1,8 +1,8 @@
 /* eslint-disable @typescript-eslint/ban-ts-comment */
 import {
-  PeerOutgoingMessage,
-  PeerOutgoingMessageContent,
-  PeerOutgoingMessageType,
+  PeerIncomingMessage,
+  PeerIncomingMessageContent,
+  PeerIncomingMessageType,
   PeerWithPosition
 } from '../src/lighthouse-protocol/messages'
 import { future } from 'fp-future'
@@ -111,10 +111,10 @@ describe('Peer Integration Test', function () {
 
   function sendMessageToSocket(
     peerId: string,
-    content: PeerOutgoingMessageContent,
+    content: PeerIncomingMessageContent,
     socket: SocketMock = sockets[peerId]
   ) {
-    const message: PeerOutgoingMessage = {
+    const message: PeerIncomingMessage = {
       src: '__lighthouse__',
       dst: peerId,
       ...content
@@ -165,7 +165,7 @@ describe('Peer Integration Test', function () {
     sendMessageToSocket(
       peerId,
       {
-        type: PeerOutgoingMessageType.CHANGE_ISLAND,
+        type: PeerIncomingMessageType.CHANGE_ISLAND,
         payload: { islandId, peers: getIslandPeers(islandId) }
       },
       socket ?? sockets[peerId]
@@ -174,7 +174,7 @@ describe('Peer Integration Test', function () {
     getIslandPeers(islandId).forEach((it) => {
       if (it.id !== peerId) {
         sendMessageToSocket(it.id, {
-          type: PeerOutgoingMessageType.PEER_JOINED_ISLAND,
+          type: PeerIncomingMessageType.PEER_JOINED_ISLAND,
           payload: { islandId, peer: { id: peerId, position } }
         })
       }
@@ -666,7 +666,7 @@ describe('Peer Integration Test', function () {
     moveAndPutInIsland(5, [0, 0, 300])
 
     sendMessageToSocket(peers[0].peer.peerIdOrFail(), {
-      type: PeerOutgoingMessageType.PEER_LEFT_ISLAND,
+      type: PeerIncomingMessageType.PEER_LEFT_ISLAND,
       payload: {
         islandId: 'I1',
         peer: { id: peers[1].peer.peerIdOrFail(), position: [0, 0, 0] }

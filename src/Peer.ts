@@ -1,4 +1,4 @@
-import { PeerOutgoingMessage, PeerOutgoingMessageType } from './lighthouse-protocol/messages'
+import { PeerIncomingMessage, PeerIncomingMessageType } from './lighthouse-protocol/messages'
 import { future, IFuture } from 'fp-future'
 import { Reader } from 'protobufjs/minimal'
 import { discretizedPositionDistanceXZ, DISCRETIZE_POSITION_INTERVALS, Position3D } from './utils/Positions'
@@ -1095,14 +1095,14 @@ export class Peer {
   }
 
   // handles ws messages that are not handled by PeerWebRTCHandler
-  private handleServerMessage(message: PeerOutgoingMessage): void {
+  private handleServerMessage(message: PeerIncomingMessage): void {
     switch (message.type) {
-      case PeerOutgoingMessageType.CHANGE_ISLAND: {
+      case PeerIncomingMessageType.CHANGE_ISLAND: {
         const { islandId, peers } = message.payload
         this.setIsland(islandId, peers)
         break
       }
-      case PeerOutgoingMessageType.PEER_LEFT_ISLAND: {
+      case PeerIncomingMessageType.PEER_LEFT_ISLAND: {
         const { islandId, peer } = message.payload
         if (islandId === this.currentIslandId) {
           if (this.isConnectedTo(peer.id)) this.disconnectFrom(peer.id)
@@ -1111,7 +1111,7 @@ export class Peer {
         }
         break
       }
-      case PeerOutgoingMessageType.PEER_JOINED_ISLAND: {
+      case PeerIncomingMessageType.PEER_JOINED_ISLAND: {
         const { islandId, peer } = message.payload
         if (islandId === this.currentIslandId) {
           this.addKnownPeerIfNotExists(peer)

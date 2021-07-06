@@ -1,4 +1,4 @@
-import { PeerOutgoingMessage } from '../lighthouse-protocol/messages'
+import { PeerIncomingMessage } from '../lighthouse-protocol/messages'
 import { ServerMessageType } from './enums'
 
 export type ServerMessage =
@@ -8,4 +8,4 @@ export type ServerMessage =
       src: string
       dst: string
     }
-  | PeerOutgoingMessage
+  | PeerIncomingMessage

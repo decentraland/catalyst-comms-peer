@@ -1,5 +1,5 @@
-// OUTGOING
-export enum PeerOutgoingMessageType {
+// INCOMING
+export enum PeerIncomingMessageType {
   PEER_LEFT_ISLAND = 'PEER_LEFT_ISLAND',
   PEER_JOINED_ISLAND = 'PEER_JOINED_ISLAND',
   OPTIMAL_NETWORK_RESPONSE = 'OPTIMAL_NETWORK_RESPONSE',
@@ -12,7 +12,7 @@ export type PeerWithPosition = {
 }
 
 export type ChangeIsland = {
-  type: PeerOutgoingMessageType.CHANGE_ISLAND
+  type: PeerIncomingMessageType.CHANGE_ISLAND
   payload: {
     islandId: string
     peers: PeerWithPosition[]
@@ -20,7 +20,7 @@ export type ChangeIsland = {
 }
 
 export type PeerJoinedIsland = {
-  type: PeerOutgoingMessageType.PEER_LEFT_ISLAND
+  type: PeerIncomingMessageType.PEER_LEFT_ISLAND
   payload: {
     islandId: string
     peer: PeerWithPosition
@@ -28,27 +28,27 @@ export type PeerJoinedIsland = {
 }
 
 export type PeerLeftIsland = {
-  type: PeerOutgoingMessageType.PEER_JOINED_ISLAND
+  type: PeerIncomingMessageType.PEER_JOINED_ISLAND
   payload: {
     islandId: string
     peer: PeerWithPosition
   }
 }
 
-export type PeerOutgoingMessageContent = ChangeIsland | PeerJoinedIsland | PeerLeftIsland
+export type PeerIncomingMessageContent = ChangeIsland | PeerJoinedIsland | PeerLeftIsland
 
-export type PeerOutgoingMessage = {
+export type PeerIncomingMessage = {
   readonly src: string
   readonly dst: string
-} & PeerOutgoingMessageContent
+} & PeerIncomingMessageContent
 
-// INCOMING
-export enum PeerIncomingMessageType {
+// OUTGOING
+export enum PeerOutgoingMessageType {
   HEARTBEAT = 'HEARTBEAT'
 }
 
 export type HeartbeatMessage = {
-  type: PeerIncomingMessageType.HEARTBEAT
+  type: PeerOutgoingMessageType.HEARTBEAT
   payload: {
     connectedPeerIds: string[]
     parcel?: [number, number]
@@ -56,4 +56,4 @@ export type HeartbeatMessage = {
   }
 }
 
-export type PeerIncomingMessage = HeartbeatMessage
+export type PeerOutgoingMessage = HeartbeatMessage

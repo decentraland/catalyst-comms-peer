@@ -1,4 +1,4 @@
-import { PeerOutgoingMessage } from './lighthouse-protocol/messages'
+import { PeerIncomingMessage } from './lighthouse-protocol/messages'
 import EventEmitter from 'eventemitter3'
 import { future } from 'fp-future'
 import SimplePeer, { SignalData } from 'simple-peer'
@@ -24,7 +24,7 @@ type OptionalConfig = {
   handshakePayloadExtras: () => Record<string, any>
   handshakeValidator: (payload: HandshakeData, peerId: string) => ValidationResult
   receivedOfferValidator: (payload: HandshakeData, peerId: string) => ValidationResult
-  serverMessageHandler: (message: PeerOutgoingMessage) => void
+  serverMessageHandler: (message: PeerIncomingMessage) => void
   rtcConnectionConfig: Record<string, any>
   oldConnectionsTimeout: number
   peerConnectTimeout: number
@@ -419,7 +419,7 @@ export class PeerWebRTCHandler extends EventEmitter<PeerWebRTCEvent> {
           break
         }
         default: {
-          this.config.serverMessageHandler(message as PeerOutgoingMessage)
+          this.config.serverMessageHandler(message as PeerIncomingMessage)
         }
       }
     }

@@ -83,10 +83,10 @@ export class Peer {
   constructor(
     lighthouseUrl: string,
     _peerId?: string,
-    public callback: PacketCallback = () => { },
+    public callback: PacketCallback = () => {},
     private config: PeerConfig = {
       authHandler: (msg) => Promise.resolve(msg),
-      statusHandler: () => { }
+      statusHandler: () => {}
     }
   ) {
     if (this.config.logLevel) {
@@ -194,12 +194,12 @@ export class Peer {
   }
 
   /**
-    * Sets the prefered island that'll be sent to the lighthouse to be used by archipelago.
-    * There are three possible values: 
-    * * An Island id
-    * * undefined: The parameter won't be sent to the server, and won't change the prefered island on server
-    * * null: The prefered island will be cleard, if it was defined
-    * */
+   * Sets the prefered island that'll be sent to the lighthouse to be used by archipelago.
+   * There are three possible values:
+   * * An Island id
+   * * undefined: The parameter won't be sent to the server, and won't change the prefered island on server
+   * * null: The prefered island will be cleard, if it was defined
+   * */
   public setPreferedIslandId(islandId: string | undefined | null) {
     this.preferedIslandId = islandId
   }

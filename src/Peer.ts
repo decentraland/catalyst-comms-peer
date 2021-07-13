@@ -1,4 +1,4 @@
-import { PeerIncomingMessage, PeerIncomingMessageType } from './lighthouse-protocol/messages'
+import { HeartbeatMessage, PeerIncomingMessage, PeerIncomingMessageType } from './lighthouse-protocol/messages'
 import { future, IFuture } from 'fp-future'
 import { Reader } from 'protobufjs/minimal'
 import { discretizedPositionDistanceXZ, DISCRETIZE_POSITION_INTERVALS, Position3D } from './utils/Positions'
@@ -39,7 +39,7 @@ type ActivePing = {
 }
 
 // Try not to use this. It is domain specific and should be phased out eventually
-function toParcel(position: any) {
+function toParcel(position: any): [number, number] | undefined {
   if (position instanceof Array && position.length === 3) {
     return [Math.floor(position[0] / 16), Math.floor(position[2] / 16)]
   }
@@ -61,6 +61,8 @@ export class Peer {
 
   private currentIslandId: string | undefined
 
+  private preferedIslandId: string | undefined | null
+
   private updatingNetwork: boolean = false
   private currentMessageId: number = 0
   private instanceId: number
@@ -81,10 +83,10 @@ export class Peer {
   constructor(
     lighthouseUrl: string,
     _peerId?: string,
-    public callback: PacketCallback = () => {},
+    public callback: PacketCallback = () => { },
     private config: PeerConfig = {
       authHandler: (msg) => Promise.resolve(msg),
-      statusHandler: () => {}
+      statusHandler: () => { }
     }
   ) {
     if (this.config.logLevel) {
@@ -191,6 +193,17 @@ export class Peer {
     return this.wrtcHandler.maybePeerId()
   }
 
+  /**
+    * Sets the prefered island that'll be sent to the lighthouse to be used by archipelago.
+    * There are three possible values: 
+    * * An Island id
+    * * undefined: The parameter won't be sent to the server, and won't change the prefered island on server
+    * * null: The prefered island will be cleard, if it was defined
+    * */
+  public setPreferedIslandId(islandId: string | undefined | null) {
+    this.preferedIslandId = islandId
+  }
+
   public setLighthouseUrl(lighthouseUrl: string) {
     this.cleanStateAndConnections()
 
@@ -273,13 +286,24 @@ export class Peer {
   }
 
   private buildPositionInfo() {
-    return this.config.positionConfig
-      ? {
-          position: this.config.positionConfig.selfPosition(),
-          // This is domain specific, but we still need it for finding crowded realms
-          parcel: toParcel(this.config.positionConfig.selfPosition())
-        }
-      : {}
+    if (this.config.positionConfig) {
+      const positionInfo: Omit<HeartbeatMessage['payload'], 'connectedPeerIds'> = {
+        position: this.config.positionConfig.selfPosition(),
+        // This is domain specific, but we still need it for finding crowded realms
+        parcel: toParcel(this.config.positionConfig.selfPosition())
+      }
+
+      if (this.preferedIslandId) {
+        positionInfo.preferedIslandId = this.preferedIslandId
+      } else if (this.preferedIslandId === null) {
+        /** This is somewhat confusing. But is the easiest way to track this with only one attribute. See {@link Peer.setPreferedIslandId)}*/
+        positionInfo.preferedIslandId = undefined
+      }
+
+      return positionInfo
+    } else {
+      return {}
+    }
   }
 
   private markReceived(packet: Packet) {

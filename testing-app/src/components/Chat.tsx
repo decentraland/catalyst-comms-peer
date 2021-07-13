@@ -58,6 +58,7 @@ export function Chat(props: { peer: Peer; room: string; url: string }) {
   const [message, setMessage] = useState('')
   const [cursors, setCursors] = useState<Record<string, Cursor>>({})
   const [updatingCursors, setUpdatingCursors] = useState(!!new URLSearchParams(window.location.search).get('updatingCursors'))
+  const [preferedIslandId] = useState<string | null>(new URLSearchParams(window.location.search).get('islandId'))
   const [currentRoom, setCurrentRoom] = useState(props.room)
   const [availableRooms, setAvailableRooms] = useState([])
   const [joinedRooms, setJoinedRooms] = useState([...props.peer.currentRooms])
@@ -81,6 +82,10 @@ export function Chat(props: { peer: Peer; room: string; url: string }) {
       default:
         console.log('Received unknown message type: ' + payload.type)
     }
+  }
+
+  if(preferedIslandId) {
+    props.peer.setPreferedIslandId(preferedIslandId)
   }
 
   props.peer.onIslandChange = (islandId) => setCurrentIslandId(islandId)

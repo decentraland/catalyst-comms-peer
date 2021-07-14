@@ -3,7 +3,7 @@
   "version": "1.0.0-experimental.2",
   "description": "Catalyst Peer Library",
   "main": "dist/index.js",
-  "typings": "./dist/index.d.ts",
+  "typings": "dist/index.d.ts",
   "scripts": {
     "prebuild": "rm -rf dist",
     "test": "$npm_execpath run build-with-tests && karma start karma.conf.js --single-run",
@@ -45,5 +45,6 @@
     "singleQuote": true,
     "printWidth": 120,
     "trailingComma": "none"
-  }
+  },
+  "files": ["dist"]
 }

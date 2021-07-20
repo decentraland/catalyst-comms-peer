@@ -49,6 +49,8 @@ export type ValidationResult = {
   message?: string
 }
 
+export type AuthHandler = (msg: string) => Promise<string>
+
 export type PeerConfig = {
   connectionConfig?: any
   wrtc?: any
@@ -63,9 +65,8 @@ export type PeerConfig = {
   logLevel?: LogLevelString
   reconnectionAttempts?: number
   backoffMs?: number
-  authHandler?: (msg: string) => Promise<string>
+  authHandler?: AuthHandler
   positionConfig?: PositionConfig
-  statusHandler?: (status: PeerStatus) => void
   statsUpdateInterval?: number
   /**
    * If not set, the peer won't execute pings regularly.
@@ -81,7 +82,14 @@ export type PeerConfig = {
   relaySuspensionConfig?: RelaySuspensionConfig
   heartbeatInterval?: number
 
+  eventsHandler?: PeerEventsHandler
+}
+
+export type PeerEventsHandler = {
+  statusHandler?: (status: PeerStatus) => void
   onIslandChange?: (islandId: string) => any
+  onPeerLeftIsland?: (peerId: string) => any
+  onPeerJoinedIsland?: (peerId: string) => any
 }
 
 export type RelaySuspensionConfig = {

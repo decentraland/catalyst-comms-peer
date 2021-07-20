@@ -33,7 +33,7 @@ type OptionalConfig = {
 type Config = {
   packetHandler: (data: Uint8Array, peerId: string) => void
   peerId?: string
-  authHandler?: (msg: string) => Promise<string>
+  authHandler: (msg: string) => Promise<string>
   socketBuilder?: SocketBuilder
   wrtc?: WebRTCProvider
 }

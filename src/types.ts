@@ -2,7 +2,7 @@ import SimplePeer from 'simple-peer'
 import { Position3D } from './utils/Positions'
 import { SocketBuilder } from './peerjs-server-connector/socket'
 import { Packet } from './proto/peer_protobuf'
-import { ValidationMessagePayload } from 'peerjs-server-connector/peerjsserverconnection'
+import { ValidationMessagePayload } from './peerjs-server-connector/peerjsserverconnection'
 
 type PacketSubtypeData = {
   lastTimestamp: number

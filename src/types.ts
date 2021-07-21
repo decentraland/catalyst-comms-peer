@@ -2,6 +2,7 @@ import SimplePeer from 'simple-peer'
 import { Position3D } from './utils/Positions'
 import { SocketBuilder } from './peerjs-server-connector/socket'
 import { Packet } from './proto/peer_protobuf'
+import { ValidationMessagePayload } from './peerjs-server-connector/peerjsserverconnection'
 
 type PacketSubtypeData = {
   lastTimestamp: number
@@ -49,6 +50,8 @@ export type ValidationResult = {
   message?: string
 }
 
+export type AuthHandler = (msg: string) => Promise<ValidationMessagePayload>
+
 export type PeerConfig = {
   connectionConfig?: any
   wrtc?: any
@@ -63,9 +66,8 @@ export type PeerConfig = {
   logLevel?: LogLevelString
   reconnectionAttempts?: number
   backoffMs?: number
-  authHandler?: (msg: string) => Promise<string>
+  authHandler?: AuthHandler
   positionConfig?: PositionConfig
-  statusHandler?: (status: PeerStatus) => void
   statsUpdateInterval?: number
   /**
    * If not set, the peer won't execute pings regularly.
@@ -81,7 +83,14 @@ export type PeerConfig = {
   relaySuspensionConfig?: RelaySuspensionConfig
   heartbeatInterval?: number
 
-  onIslandChange?: (islandId: string) => any
+  eventsHandler?: PeerEventsHandler
+}
+
+export type PeerEventsHandler = {
+  statusHandler?: (status: PeerStatus) => void
+  onIslandChange?: (islandId: string | undefined, peers: MinPeerData[]) => any
+  onPeerLeftIsland?: (peerId: string) => any
+  onPeerJoinedIsland?: (peerId: string) => any
 }
 
 export type RelaySuspensionConfig = {

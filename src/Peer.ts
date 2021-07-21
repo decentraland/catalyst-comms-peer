@@ -14,12 +14,14 @@ import { MessageData, Packet, PayloadEncoding, PingData, PongData, SuspendRelayD
 import { GlobalStats } from './stats'
 import { TimeKeeper } from './TimeKeeper'
 import {
+  AuthHandler,
   ConnectedPeerData,
   KnownPeerData,
   LogLevel,
   MinPeerData,
   PacketCallback,
   PeerConfig,
+  PeerEventsHandler,
   PeerRelayData,
   PingResult
 } from './types'
@@ -46,6 +48,11 @@ function toParcel(position: any): [number, number] | undefined {
 }
 
 type NetworkOperation = () => Promise<KnownPeerData[]>
+
+type InternalPeerConfig = PeerConfig & {
+  eventsHandler: PeerEventsHandler
+  authHandler: AuthHandler
+}
 
 export class Peer {
   private wrtcHandler: PeerWebRTCHandler
@@ -80,15 +87,20 @@ export class Peer {
 
   private retryingConnection: boolean = false
 
+  private config: InternalPeerConfig
+
   constructor(
     lighthouseUrl: string,
     _peerId?: string,
     public callback: PacketCallback = () => {},
-    private config: PeerConfig = {
-      authHandler: (msg) => Promise.resolve(msg),
-      statusHandler: () => {}
-    }
+    _config: PeerConfig = {}
   ) {
+    this.config = {
+      authHandler: (msg) => Promise.resolve(msg),
+      eventsHandler: {},
+      ..._config
+    }
+
     if (this.config.logLevel) {
       this.logLevel = this.config.logLevel
     }
@@ -145,7 +157,7 @@ export class Peer {
 
     this.wrtcHandler.on(PeerWebRTCEvent.ServerConnectionError, async (err) => {
       if (err.type === PeerErrorType.UnavailableID) {
-        this.config.statusHandler!('id-taken')
+        this.config.eventsHandler.statusHandler?.('id-taken')
       } else {
         if (!this.retryingConnection) await this.retryConnection()
       }
@@ -350,7 +362,7 @@ export class Peer {
         this.log(LogLevel.WARN, `Error while reconnecting (attempt ${i}) `, e)
         if (i >= reconnectionAttempts!) {
           this.log(LogLevel.ERROR, `Could not reconnect after ${reconnectionAttempts} failed attempts `, e)
-          this.config.statusHandler!('reconnection-error')
+          this.config.eventsHandler.statusHandler?.('reconnection-error')
           break
         }
       }
@@ -367,12 +379,12 @@ export class Peer {
     }
   }
 
-  set onIslandChange(onChange: ((islandId: string) => any) | undefined) {
-    this.config.onIslandChange = onChange
+  set onIslandChange(onChange: ((islandId: string, peers: MinPeerData[]) => any) | undefined) {
+    this.config.eventsHandler.onIslandChange = onChange
   }
 
   get onIslandChange() {
-    return this.config.onIslandChange
+    return this.config.eventsHandler.onIslandChange
   }
 
   setIsland(islandId: string, peers: MinPeerData[]) {
@@ -383,7 +395,7 @@ export class Peer {
     this.disconnectFromUnknownPeers()
     this.triggerUpdateNetwork(`changed to island ${islandId}`)
 
-    this.config.onIslandChange?.(islandId)
+    this.config.eventsHandler.onIslandChange?.(islandId, peers)
   }
 
   private cleanStateAndConnections() {
@@ -1132,6 +1144,7 @@ export class Peer {
           if (this.isConnectedTo(peer.id)) this.disconnectFrom(peer.id)
           this.removeKnownPeer(peer.id)
           this.triggerUpdateNetwork(`peer ${peer.id} joined island`)
+          this.config.eventsHandler.onPeerLeftIsland?.(peer.id)
         }
         break
       }
@@ -1140,6 +1153,7 @@ export class Peer {
         if (islandId === this.currentIslandId) {
           this.addKnownPeerIfNotExists(peer)
           this.triggerUpdateNetwork(`peer ${peer.id} joined island`)
+          this.config.eventsHandler.onPeerJoinedIsland?.(peer.id)
         }
         break
       }

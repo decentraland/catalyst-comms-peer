@@ -46,5 +46,7 @@
     "printWidth": 120,
     "trailingComma": "none"
   },
-  "files": ["dist"]
+  "files": [
+    "dist"
+  ]
 }

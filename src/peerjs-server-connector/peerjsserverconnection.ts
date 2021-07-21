@@ -12,6 +12,8 @@ export type MessageHandler = {
   handleMessage(messsage: ServerMessage): void
 }
 
+export type ValidationMessagePayload = any
+
 class PeerOptions {
   debug?: LogLevel // 1: Errors, 2: Warnings, 3: All logs
   host?: string
@@ -24,7 +26,7 @@ class PeerOptions {
   socketBuilder?: SocketBuilder
   heartbeatExtras?: () => object
   logFunction?: (logLevel: LogLevel, ...rest: any[]) => void
-  authHandler?: (msg: string) => Promise<string>
+  authHandler?: (msg: string) => Promise<ValidationMessagePayload>
 }
 
 export type HandshakeData = {
@@ -37,7 +39,7 @@ export function createOfferMessage(myId: string, peerData: ConnectedPeerData, ha
   return createMessage(myId, peerData.id, ServerMessageType.Offer, handshakeData)
 }
 
-export function createValidationMessage(myId: string, payload: string) {
+export function createValidationMessage(myId: string, payload: ValidationMessagePayload) {
   return {
     type: ServerMessageType.Validation,
     src: myId,
@@ -368,7 +370,7 @@ export class PeerJSServerConnection extends EventEmitter {
     this.socket.send(createAnswerMessage(this.id!, peerData, handshakeData))
   }
 
-  sendValidation(payload: string) {
+  sendValidation(payload: ValidationMessagePayload) {
     this.socket.send(createValidationMessage(this.id!, payload))
   }
 

@@ -88,7 +88,7 @@ export type PeerConfig = {
 
 export type PeerEventsHandler = {
   statusHandler?: (status: PeerStatus) => void
-  onIslandChange?: (islandId: string | undefined) => any
+  onIslandChange?: (islandId: string | undefined, peers: MinPeerData[]) => any
   onPeerLeftIsland?: (peerId: string) => any
   onPeerJoinedIsland?: (peerId: string) => any
 }

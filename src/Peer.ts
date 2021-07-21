@@ -379,7 +379,7 @@ export class Peer {
     }
   }
 
-  set onIslandChange(onChange: ((islandId: string) => any) | undefined) {
+  set onIslandChange(onChange: ((islandId: string, peers: MinPeerData[]) => any) | undefined) {
     this.config.eventsHandler.onIslandChange = onChange
   }
 
@@ -395,7 +395,7 @@ export class Peer {
     this.disconnectFromUnknownPeers()
     this.triggerUpdateNetwork(`changed to island ${islandId}`)
 
-    this.config.eventsHandler.onIslandChange?.(islandId)
+    this.config.eventsHandler.onIslandChange?.(islandId, peers)
   }
 
   private cleanStateAndConnections() {

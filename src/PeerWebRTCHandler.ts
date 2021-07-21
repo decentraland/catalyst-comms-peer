@@ -4,7 +4,11 @@ import { future } from 'fp-future'
 import SimplePeer, { SignalData } from 'simple-peer'
 import { PeerSignals, PEER_CONSTANTS } from './constants'
 import { PeerEventType, ServerMessageType } from './peerjs-server-connector/enums'
-import { HandshakeData, PeerJSServerConnection, ValidationMessagePayload } from './peerjs-server-connector/peerjsserverconnection'
+import {
+  HandshakeData,
+  PeerJSServerConnection,
+  ValidationMessagePayload
+} from './peerjs-server-connector/peerjsserverconnection'
 import { ServerMessage } from './peerjs-server-connector/servermessage'
 import { SocketBuilder } from './peerjs-server-connector/socket'
 import { connectionIdFor, util } from './peerjs-server-connector/util'

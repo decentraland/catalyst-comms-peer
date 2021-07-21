@@ -817,9 +817,11 @@ describe('Peer Integration Test', function () {
   it('raises an specific error when the requested id is taken', async () => {
     let idTakenErrorReceived = false
     extraPeersConfig = {
-      statusHandler: (status) => {
-        if (status === 'id-taken') {
-          idTakenErrorReceived = true
+      eventsHandler: {
+        statusHandler: (status) => {
+          if (status === 'id-taken') {
+            idTakenErrorReceived = true
+          }
         }
       }
     }

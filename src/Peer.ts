@@ -181,7 +181,7 @@ export class Peer {
     const scheduleUpdateNetwork = () =>
       setTimeout(() => {
         try {
-          this.updateNetwork()
+          this.triggerUpdateNetwork('scheduled network update')
         } catch (e) {
           this.log(LogLevel.ERROR, "Couldn't update network", e)
         } finally {

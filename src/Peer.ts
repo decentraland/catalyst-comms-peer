@@ -75,6 +75,7 @@ export class Peer {
   private instanceId: number
 
   private expireTimeoutId: NodeJS.Timeout | number
+  private updateNetworkTimeoutId: NodeJS.Timeout | number
   private pingTimeoutId?: NodeJS.Timeout | number
 
   public stats: GlobalStats
@@ -177,7 +178,19 @@ export class Peer {
         }
       }, PEER_CONSTANTS.EXPIRATION_LOOP_INTERVAL)
 
+    const scheduleUpdateNetwork = () =>
+      setTimeout(() => {
+        try {
+          this.updateNetwork()
+        } catch (e) {
+          this.log(LogLevel.ERROR, "Couldn't update network", e)
+        } finally {
+          this.updateNetworkTimeoutId = scheduleUpdateNetwork()
+        }
+      }, PEER_CONSTANTS.UPDATE_NETWORK_INTERVAL)
+
     this.expireTimeoutId = scheduleExpiration()
+    this.updateNetworkTimeoutId = scheduleExpiration()
 
     if (this.config.pingInterval) {
       const schedulePing = () =>
@@ -1233,6 +1246,7 @@ export class Peer {
 
   async dispose() {
     this.disposed = true
+    clearTimeout(this.updateNetworkTimeoutId as any)
     clearTimeout(this.expireTimeoutId as any)
     clearTimeout(this.pingTimeoutId as any)
     this.cleanStateAndConnections()

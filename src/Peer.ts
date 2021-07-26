@@ -185,7 +185,7 @@ export class Peer {
       }, PEER_CONSTANTS.UPDATE_NETWORK_INTERVAL)
 
     this.expireTimeoutId = scheduleExpiration()
-    this.updateNetworkTimeoutId = scheduleExpiration()
+    this.updateNetworkTimeoutId = scheduleUpdateNetwork()
 
     if (this.config.pingInterval) {
       const schedulePing = () =>

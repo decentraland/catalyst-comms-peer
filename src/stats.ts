@@ -2,6 +2,10 @@ import { average } from './utils/util'
 import { Peer } from './Peer'
 import { Packet } from './proto/peer_protobuf'
 
+if (typeof performance === 'undefined') {
+  var { performance } = require('perf_hooks')
+}
+
 type PeriodicValue = {
   accumulatedInPeriod: number
   currentValue?: number

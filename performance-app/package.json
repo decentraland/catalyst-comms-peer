@@ -4,19 +4,28 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "start": "tsc --watch --project tsconfig.json"
+    "start": "tsc --watch --project tsconfig.json",
+    "build": "tsc --build"
   },
   "author": "",
   "license": "ISC",
   "devDependencies": {
     "@types/express": "^4.17.13",
     "@types/node": "^16.4.3",
+    "@types/node-fetch": "^2.5.12",
     "ts-proto": "^1.82.2",
-    "ts-protoc-gen": "^0.15.0"
+    "ts-protoc-gen": "^0.15.0",
+    "typescript": "^4.3.5"
   },
   "dependencies": {
     "@dcl/catalyst-peer": "file:../",
+    "eventemitter3": "^4.0.7",
     "express": "^4.17.1",
-    "long": "^4.0.0"
+    "fp-future": "^1.0.1",
+    "long": "^4.0.0",
+    "node-fetch": "^2.6.1",
+    "protobufjs": "^6.11.2",
+    "simple-peer": "^9.11.0",
+    "ws": "^8.0.0"
   }
 }

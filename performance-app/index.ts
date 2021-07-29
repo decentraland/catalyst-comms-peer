@@ -9,16 +9,19 @@ import { GlobalStats, buildCatalystPeerStatsData } from '../src/stats'
 import { PeerConfig } from '../src/types'
 import { randomBetween } from '../src/utils/util'
 import { ChatData, CommsMessage, PositionData, ProfileData } from './messages/messages'
+import { performance } from 'perf_hooks'
+// import fetch from 'node-fetch'
+import { writeFileSync } from 'fs'
 
-const numberOfPeers = parseInt(process.env.numberOfPeers ?? '1')
-const testDuration = parseInt(process.env.testDuration ?? '180') * 1000
-const statsSubmitInterval = parseInt(process.env.statsSubmitInterval ?? '2000')
-const lighthouseUrl = process.env.lighthouseUrl ?? 'http://localhost:9000'
-const statsServerUrl = process.env.statsServerUrl ?? 'http://localhost:9904'
-const testId = process.env.testId
-const pingInterval = parseInt(process.env.pingInterval ?? '9')
+const numberOfPeers = parseInt(process.env.NUMBER_OF_PEERS ?? '2')
+const testDuration = parseInt(process.env.TEST_DURATION ?? '180') * 1000
+const statsSubmitInterval = parseInt(process.env.STATS_SUBMIT_INTERVAL ?? '2000')
+const lighthouseUrl = process.env.LIGHTHOUSE_URL ?? 'http://localhost:9000'
+const statsServerUrl = process.env.STATS_SERVER_URL ?? 'http://localhost:9904'
+const testId = process.env.TEST_ID
+const pingInterval = parseInt(process.env.PING_INTERVAL ?? '900')
 
-const peerIdLength = parseInt(process.env.peerIdLength ?? '42') // We use a string of length 42 to emulate a ethereum address as per bandwidth
+const peerIdLength = parseInt(process.env.PEER_ID_LENGTH ?? '42') // We use a string of length 42 to emulate a ethereum address as per bandwidth
 
 if (!testId) {
   console.error('Missing parameter testId! No results will be submited to stats server')
@@ -213,11 +216,12 @@ async function submitStats(peer: SimulatedPeer, stats: GlobalStats) {
   const statsToSubmit = buildCatalystPeerStatsData(peer.peer)
 
   if (statsServerUrl && testId) {
-    await fetch(`${statsServerUrl}/test/${testId}/peer/${peer.peer.peerId}/metrics`, {
-      method: 'PUT',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(statsToSubmit)
-    })
+    writeFileSync(`${testId}-peer-${peer.peer.peerId}-metrics-${Date.now()}.json`, JSON.stringify(statsToSubmit))
+    // await fetch(`${statsServerUrl}/test/${testId}/peer/${peer.peer.peerId}/metrics`, {
+    //   method: 'PUT',
+    //   headers: { 'Content-Type': 'application/json' },
+    //   body: JSON.stringify(statsToSubmit)
+    // })
   }
 }
 

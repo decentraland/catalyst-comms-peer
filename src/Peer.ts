@@ -26,6 +26,10 @@ import {
   PingResult
 } from './types'
 
+if (typeof performance === 'undefined') {
+  var { performance } = require('perf_hooks')
+}
+
 const PROTOCOL_VERSION = 5
 
 type PacketData =

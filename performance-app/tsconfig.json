@@ -1,6 +1,5 @@
 {
   "compilerOptions": {
-    "baseUrl": "src",
     "outDir": "dist",
     "module": "commonjs",
     "target": "es2017",
@@ -22,5 +21,5 @@
     "plugins": [{ "name": "tslint-language-service" }],
     "declaration": true
   },
-  "exclude": ["node_modules", "dist", "testing-app"]
+  "exclude": ["node_modules", "dist"]
 }

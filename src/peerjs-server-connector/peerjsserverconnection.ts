@@ -8,6 +8,10 @@ import { ServerMessage } from './servermessage'
 import { Socket, SocketBuilder } from './socket'
 import { util } from './util'
 
+if (typeof WebSocket === 'undefined') {
+  var WebSocket = require('ws')
+}
+
 export type MessageHandler = {
   handleMessage(messsage: ServerMessage): void
 }

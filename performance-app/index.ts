@@ -27,6 +27,9 @@ if (!testId) {
   console.error('Missing parameter testId! No results will be submited to stats server')
 }
 
+let metrics = {}
+const peerIds: string[] = []
+
 type Routine = (elapsed: number, delta: number, peer: SimulatedPeer) => void
 
 const timeBetweenPositionMessages = 100
@@ -103,7 +106,13 @@ class PeriodicAction {
 }
 
 function runLoops(startingPosition: Position3D, speed: number = 5): Routine {
-  const periodicPosition = new PeriodicAction(timeBetweenPositionMessages, (a, b, peer) => {
+  const periodicPosition = new PeriodicAction(timeBetweenPositionMessages, (a, b, peer: SimulatedPeer) => {
+    console.log('peerIds', peerIds)
+    console.log('peerId', peer.peer.peerId)
+    console.log('periodic position', peer.peer.getCurrentIslandId())
+
+    console.log(`isConnectedTo ${peerIds[0]}`, peer.peer.isConnectedTo(peerIds[0]))
+    console.log(`isConnectedTo ${peerIds[1]}`, peer.peer.isConnectedTo(peerIds[1]))
     peer.peer.sendMessage(
       'room',
       createAndEncodeCommsMessage(createPositionData(peer.position, peer.rotation), 'positionData'),
@@ -217,6 +226,7 @@ async function submitStats(peer: SimulatedPeer, stats: GlobalStats) {
 
   if (statsServerUrl && testId) {
     writeFileSync(`${testId}-peer-${peer.peer.peerId}-metrics-${Date.now()}.json`, JSON.stringify(statsToSubmit))
+    metrics = {}
     // await fetch(`${statsServerUrl}/test/${testId}/peer/${peer.peer.peerId}/metrics`, {
     //   method: 'PUT',
     //   headers: { 'Content-Type': 'application/json' },
@@ -270,12 +280,17 @@ async function createPeer() {
 
   await simulatedPeer.peer.awaitConnectionEstablished()
 
+  await retry(async () => simulatedPeer.peer.setIsland('poseidon', []))
   await retry(() => simulatedPeer.peer.joinRoom('room'))
 
   simulatedPeer.peer.stats.onPeriodicStatsUpdated = (stats) => {
     if (testOngoing())
       submitStats(simulatedPeer, stats).catch((e) => console.error('Error submiting stats to server', e))
   }
+
+  const peerId = simulatedPeer.peer.peerId
+
+  peerIds.push(peerId as any)
 
   return simulatedPeer
 }
@@ -286,7 +301,6 @@ async function createPeer() {
   console.log('Creating ' + numberOfPeers + ' peers')
 
   const peers: SimulatedPeer[] = await Promise.all([...new Array(numberOfPeers).keys()].map((_) => createPeer()))
-  const metrics = {}
 
   let lastTickStamp: number | undefined
 
@@ -335,6 +349,8 @@ async function createPeer() {
     metrics['known-peers'] = average(peers.map((it) => Object.keys(it.peer.knownPeers).length))
     // @ts-ignore
     metrics['latency'] = average(peers.flatMap((it) => Object.values(it.peer.knownPeers).map((kp) => kp.latency)))
+
+    writeFileSync(`${testId}-metrics-${Date.now()}.json`, JSON.stringify(metrics))
 
     if (testOngoing()) {
       setTimeout(updateStats, 500)

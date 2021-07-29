@@ -1,6 +1,7 @@
 export const DISCRETIZE_POSITION_INTERVALS = [32, 64, 80, 128, 160]
 
 export type Position3D = [number, number, number]
+export type Quaternion = [number, number, number, number]
 
 /**
  * Calculates the discretized distance between position a and position b, using the provided intervals (DISCRETIZE_POSITION_INTERVALS as default)

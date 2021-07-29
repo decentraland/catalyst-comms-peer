@@ -1,0 +1,22 @@
+{
+  "name": "performance-app",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "start": "tsc --watch --project tsconfig.json"
+  },
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "@types/express": "^4.17.13",
+    "@types/node": "^16.4.3",
+    "ts-proto": "^1.82.2",
+    "ts-protoc-gen": "^0.15.0"
+  },
+  "dependencies": {
+    "@dcl/catalyst-peer": "file:../",
+    "express": "^4.17.1",
+    "long": "^4.0.0"
+  }
+}

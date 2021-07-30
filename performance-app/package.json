@@ -26,6 +26,7 @@
     "node-fetch": "^2.6.1",
     "protobufjs": "^6.11.2",
     "simple-peer": "^9.11.0",
+    "wrtc": "^0.4.7",
     "ws": "^8.0.0"
   }
 }

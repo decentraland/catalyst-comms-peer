@@ -12,6 +12,7 @@ import { ChatData, CommsMessage, PositionData, ProfileData } from './messages/me
 import { performance } from 'perf_hooks'
 // import fetch from 'node-fetch'
 import { writeFileSync } from 'fs'
+import wrtc from 'wrtc'
 
 const numberOfPeers = parseInt(process.env.NUMBER_OF_PEERS ?? '2')
 const testDuration = parseInt(process.env.TEST_DURATION ?? '180') * 1000
@@ -21,7 +22,7 @@ const statsServerUrl = process.env.STATS_SERVER_URL ?? 'http://localhost:9904'
 const testId = process.env.TEST_ID
 const pingInterval = parseInt(process.env.PING_INTERVAL ?? '900')
 
-const peerIdLength = parseInt(process.env.PEER_ID_LENGTH ?? '42') // We use a string of length 42 to emulate a ethereum address as per bandwidth
+// const peerIdLength = parseInt(process.env.PEER_ID_LENGTH ?? '42') // We use a string of length 42 to emulate a ethereum address as per bandwidth
 
 if (!testId) {
   console.error('Missing parameter testId! No results will be submited to stats server')
@@ -107,12 +108,6 @@ class PeriodicAction {
 
 function runLoops(startingPosition: Position3D, speed: number = 5): Routine {
   const periodicPosition = new PeriodicAction(timeBetweenPositionMessages, (a, b, peer: SimulatedPeer) => {
-    console.log('peerIds', peerIds)
-    console.log('peerId', peer.peer.peerId)
-    console.log('periodic position', peer.peer.getCurrentIslandId())
-
-    console.log(`isConnectedTo ${peerIds[0]}`, peer.peer.isConnectedTo(peerIds[0]))
-    console.log(`isConnectedTo ${peerIds[1]}`, peer.peer.isConnectedTo(peerIds[1]))
     peer.peer.sendMessage(
       'room',
       createAndEncodeCommsMessage(createPositionData(peer.position, peer.rotation), 'positionData'),
@@ -212,7 +207,8 @@ const peerConfig: PeerConfig = {
   },
   pingInterval,
   authHandler: (msg) => Promise.resolve(msg),
-  logLevel: 'NONE'
+  logLevel: 'NONE',
+  wrtc
 }
 
 function generatePosition(): Position3D {
@@ -226,7 +222,6 @@ async function submitStats(peer: SimulatedPeer, stats: GlobalStats) {
 
   if (statsServerUrl && testId) {
     writeFileSync(`${testId}-peer-${peer.peer.peerId}-metrics-${Date.now()}.json`, JSON.stringify(statsToSubmit))
-    metrics = {}
     // await fetch(`${statsServerUrl}/test/${testId}/peer/${peer.peer.peerId}/metrics`, {
     //   method: 'PUT',
     //   headers: { 'Content-Type': 'application/json' },
@@ -255,7 +250,7 @@ async function createPeer() {
     rotation: [0, 0, 0, 0],
     peer: new Peer(
       lighthouseUrl,
-      util.generateToken(peerIdLength),
+      undefined,
       (sender, room, payload: Uint8Array) => {
         const message = CommsMessage.decode(Reader.create(payload))
 
@@ -280,7 +275,7 @@ async function createPeer() {
 
   await simulatedPeer.peer.awaitConnectionEstablished()
 
-  await retry(async () => simulatedPeer.peer.setIsland('poseidon', []))
+  // await retry(async () => simulatedPeer.peer.setIsland('poseidon', []))
   await retry(() => simulatedPeer.peer.joinRoom('room'))
 
   simulatedPeer.peer.stats.onPeriodicStatsUpdated = (stats) => {
@@ -350,7 +345,7 @@ async function createPeer() {
     // @ts-ignore
     metrics['latency'] = average(peers.flatMap((it) => Object.values(it.peer.knownPeers).map((kp) => kp.latency)))
 
-    writeFileSync(`${testId}-metrics-${Date.now()}.json`, JSON.stringify(metrics))
+    // writeFileSync(`${testId}-metrics-${Date.now()}.json`, JSON.stringify(metrics))
 
     if (testOngoing()) {
       setTimeout(updateStats, 500)

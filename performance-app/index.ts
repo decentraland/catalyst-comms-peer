@@ -1,18 +1,27 @@
 /* eslint-disable @typescript-eslint/ban-ts-comment */
+const SegfaultHandler = require('segfault-handler')
+SegfaultHandler.registerHandler('crash.log')
 
 import { Reader } from 'protobufjs'
 import { Position3D, Quaternion } from '../src/index'
 import { PeerMessageTypes } from '../src/messageTypes'
 import { Peer } from '../src/Peer'
 import { util } from '../src/peerjs-server-connector/util'
-import { GlobalStats, buildCatalystPeerStatsData } from '../src/stats'
+import { GlobalStats } from '../src/stats'
 import { PeerConfig } from '../src/types'
 import { randomBetween } from '../src/utils/util'
 import { ChatData, CommsMessage, PositionData, ProfileData } from './messages/messages'
-import { performance } from 'perf_hooks'
+// import { performance } from 'perf_hooks'
 // import fetch from 'node-fetch'
-import { writeFileSync } from 'fs'
+// import { writeFileSync } from 'fs'
 import wrtc from 'wrtc'
+// import { exit } from 'process'
+
+function sleep(ms) {
+  return new Promise((resolve) => {
+    setTimeout(resolve, ms)
+  })
+}
 
 const numberOfPeers = parseInt(process.env.NUMBER_OF_PEERS ?? '2')
 const testDuration = parseInt(process.env.TEST_DURATION ?? '180') * 1000
@@ -20,7 +29,7 @@ const statsSubmitInterval = parseInt(process.env.STATS_SUBMIT_INTERVAL ?? '2000'
 const lighthouseUrl = process.env.LIGHTHOUSE_URL ?? 'http://localhost:9000'
 const statsServerUrl = process.env.STATS_SERVER_URL ?? 'http://localhost:9904'
 const testId = process.env.TEST_ID
-const pingInterval = parseInt(process.env.PING_INTERVAL ?? '900')
+const pingInterval = parseInt(process.env.PING_INTERVAL ?? '200')
 
 // const peerIdLength = parseInt(process.env.PEER_ID_LENGTH ?? '42') // We use a string of length 42 to emulate a ethereum address as per bandwidth
 
@@ -28,10 +37,10 @@ if (!testId) {
   console.error('Missing parameter testId! No results will be submited to stats server')
 }
 
-let metrics = {}
+// let metrics = {}
 const peerIds: string[] = []
 
-type Routine = (elapsed: number, delta: number, peer: SimulatedPeer) => void
+type Routine = (elapsed: number, delta: number, peer: SimulatedPeer) => Promise<void> | void
 
 const timeBetweenPositionMessages = 100
 const timeBetweenProfileMessages = 1000
@@ -89,9 +98,9 @@ function createAndEncodeCommsMessage(data: PositionData | ProfileData | ChatData
   return CommsMessage.encode(commsMessage).finish()
 }
 
-function average(numbers: number[]) {
-  return numbers.reduce((a, b) => a + b, 0) / numbers.length
-}
+// function average(numbers: number[]) {
+//   return numbers.reduce((a, b) => a + b, 0) / numbers.length
+// }
 
 class PeriodicAction {
   private elapsed: number = 0
@@ -138,6 +147,24 @@ function runLoops(startingPosition: Position3D, speed: number = 5): Routine {
     periodicChat.update(elapsed, delta, peer)
   }
 }
+
+// async function asyncRunLoops(_, $, peer) {
+//   await peer.peer.sendMessage(
+//     'room',
+//     createAndEncodeCommsMessage(createPositionData(peer.position, peer.rotation), 'positionData'),
+//     PeerMessageTypes.unreliable('position')
+//   )
+//   await peer.peer.sendMessage(
+//     'room',
+//     createAndEncodeCommsMessage(createProfileData(peer.peer.peerId), 'profileData'),
+//     PeerMessageTypes.unreliable('profile')
+//   )
+//   await peer.peer.sendMessage(
+//     'room',
+//     createAndEncodeCommsMessage(createChatData(peer), 'chatData'),
+//     PeerMessageTypes.reliable('chat')
+//   )
+// }
 
 // function testStarted() {
 //   let started = false
@@ -218,10 +245,10 @@ function generatePosition(): Position3D {
 }
 
 async function submitStats(peer: SimulatedPeer, stats: GlobalStats) {
-  const statsToSubmit = buildCatalystPeerStatsData(peer.peer)
+  // const statsToSubmit = buildCatalystPeerStatsData(peer.peer)
 
   if (statsServerUrl && testId) {
-    writeFileSync(`${testId}-peer-${peer.peer.peerId}-metrics-${Date.now()}.json`, JSON.stringify(statsToSubmit))
+    // writeFileSync(`${testId}-peer-${peer.peer.peerId}-metrics-${Date.now()}.json`, JSON.stringify(statsToSubmit))
     // await fetch(`${statsServerUrl}/test/${testId}/peer/${peer.peer.peerId}/metrics`, {
     //   method: 'PUT',
     //   headers: { 'Content-Type': 'application/json' },
@@ -271,12 +298,14 @@ async function createPeer() {
       }
     ),
     routine: runLoops(position)
+    // routine: asyncRunLoops
   }
 
   await simulatedPeer.peer.awaitConnectionEstablished()
 
-  // await retry(async () => simulatedPeer.peer.setIsland('poseidon', []))
-  await retry(() => simulatedPeer.peer.joinRoom('room'))
+  await retry(async () => {
+    await simulatedPeer.peer.joinRoom('room')
+  })
 
   simulatedPeer.peer.stats.onPeriodicStatsUpdated = (stats) => {
     if (testOngoing())
@@ -290,69 +319,124 @@ async function createPeer() {
   return simulatedPeer
 }
 
-;(async () => {
-  // if (testId) await testStarted()
+async function main() {
+  //: Promise<() => Generator<boolean, void, unknown>>
+  // let ticks = 0
+
+  // const startTime = Date.now()
+
+  await sleep(10000)
+
+
+  await createPeer()
+  await createPeer()
+  await createPeer()
+  await createPeer()
+  await createPeer()
 
   console.log('Creating ' + numberOfPeers + ' peers')
 
-  const peers: SimulatedPeer[] = await Promise.all([...new Array(numberOfPeers).keys()].map((_) => createPeer()))
+  await sleep(1000000)
 
-  let lastTickStamp: number | undefined
+  // const peers: SimulatedPeer[] = await Promise.all([...new Array(3 | numberOfPeers).keys()].map(createPeer))
+  // // const peersTime = Date.now()
 
-  function tick() {
-    const timestamp = performance.now()
-    const delta = typeof lastTickStamp !== 'undefined' ? timestamp - lastTickStamp : 0
+  // let lastTickStamp: number | undefined
 
-    elapsed += delta
+  // function* tick() {
+  //   console.log('tick', process.pid)
+  //   const timestamp = performance.now()
+  //   const delta = typeof lastTickStamp !== 'undefined' ? timestamp - lastTickStamp : 0
 
-    lastTickStamp = timestamp
+  //   elapsed += delta
 
-    if (testOngoing()) {
-      if (delta > 0) {
-        peers.forEach((it) => it.routine(elapsed, delta, it))
-      }
-      setTimeout(tick, 16)
-    } else {
-      // TODO: Submit summary to server
-      console.log('Test finished')
-    }
-  }
+  //   lastTickStamp = timestamp
 
-  // We delay the first tick a random number to ensure the clients are not in sync
-  setTimeout(tick, Math.floor(Math.random() * 3000))
+  //   if (testOngoing()) {
+  //     if (delta > 0) {
+  //       peers.forEach((it) => it.routine(elapsed, delta, it))
+  //     }
+  //   } else {
+  //     // TODO: Submit summary to server
+  //     console.log('Test finished')
+  //   }
+  //   yield testOngoing()
+  // }
 
-  function sumForAllPeers(statsKey: string, valueKey: string) {
-    return peers.reduce((value, peer) => value + peer.peer.stats[statsKey][valueKey], 0)
-  }
+  // return tick
+}
 
-  function avgForAllPeers(statsKey: string, valueKey: string) {
-    return sumForAllPeers(statsKey, valueKey) / peers.length
-  }
+// import cluster from 'cluster'
+// const numCPUs = require('os').cpus().length
 
-  function updateStats() {
-    metrics['peers'] = peers.length
-    metrics['elapsed'] = (elapsed / 1000).toFixed(2)
-    metrics['sent'] = sumForAllPeers('sent', 'totalPackets')
-    metrics['received'] = sumForAllPeers('received', 'totalPackets')
-    metrics['relayed'] = sumForAllPeers('relayed', 'totalPackets')
-    metrics['receivedpersecond'] = avgForAllPeers('received', 'packetsPerSecond')
-    metrics['sentpersecond'] = avgForAllPeers('sent', 'packetsPerSecond')
-    metrics['relayedpersecond'] = sumForAllPeers('relayed', 'packetsPerSecond')
+// if (cluster.isMaster) {
+//   console.log(`Master ${process.pid} is running`)
 
-    metrics['connected-peers'] = average(peers.map((it) => it.peer.fullyConnectedPeerIds().length))
-    // @ts-ignore
-    metrics['known-peers'] = average(peers.map((it) => Object.keys(it.peer.knownPeers).length))
-    // @ts-ignore
-    metrics['latency'] = average(peers.flatMap((it) => Object.values(it.peer.knownPeers).map((kp) => kp.latency)))
+//   // Fork workers.
+//   console.log('num of cpus', numCPUs)
+//   for (let i = 0; i < 2; i++) {
+//     cluster.fork()
+//   }
 
-    // writeFileSync(`${testId}-metrics-${Date.now()}.json`, JSON.stringify(metrics))
+//   cluster.on('exit', (worker, code, signal) => {
+//     console.log(`worker ${worker.process.pid} died, code: ${code}, signal: ${signal} `)
+//   })
+// } else {
+//   // Workers can share any TCP connection
+//   // In this case it is an HTTP server
+//   main()
+//     .then(async (tick) => {
+//       let value = tick().next().value
+//       while (value) {
+//         await sleep(1000)
 
-    if (testOngoing()) {
-      setTimeout(updateStats, 500)
-    }
-  }
+//         console.log('value', value)
 
-  updateStats()
-})().catch((e) => {
-  console.error('Test aborted', e)
-})
+//         tick().next().value
+//       }
+//     })
+//     .catch((err) => {
+//       console.log(`Worker ${process.pid} died`, err)
+//     })
+//   console.log(`Worker ${process.pid} started`)
+// }
+
+// ;(async () => {
+//   // if (testId) await testStarted()
+//   // // We delay the first tick a random number to ensure the clients are not in sync
+//   // setTimeout(tick, Math.floor(Math.random() * 3000))
+//   // function sumForAllPeers(statsKey: string, valueKey: string) {
+//   //   return peers.reduce((value, peer) => value + peer.peer.stats[statsKey][valueKey], 0)
+//   // }
+//   // function avgForAllPeers(statsKey: string, valueKey: string) {
+//   //   return sumForAllPeers(statsKey, valueKey) / peers.length
+//   // }
+//   // function updateStats() {
+//   //   metrics['peers'] = peers.length
+//   //   metrics['elapsed'] = (elapsed / 1000).toFixed(2)
+//   //   metrics['sent'] = sumForAllPeers('sent', 'totalPackets')
+//   //   metrics['received'] = sumForAllPeers('received', 'totalPackets')
+//   //   metrics['relayed'] = sumForAllPeers('relayed', 'totalPackets')
+//   //   metrics['receivedpersecond'] = avgForAllPeers('received', 'packetsPerSecond')
+//   //   metrics['sentpersecond'] = avgForAllPeers('sent', 'packetsPerSecond')
+//   //   metrics['relayedpersecond'] = sumForAllPeers('relayed', 'packetsPerSecond')
+//   //   metrics['connected-peers'] = average(peers.map((it) => it.peer.fullyConnectedPeerIds().length))
+//   //   // @ts-ignore
+//   //   metrics['known-peers'] = average(peers.map((it) => Object.keys(it.peer.knownPeers).length))
+//   //   // @ts-ignore
+//   //   metrics['latency'] = average(peers.flatMap((it) => Object.values(it.peer.knownPeers).map((kp) => kp.latency)))
+//   //   // writeFileSync(`${testId}-metrics-${Date.now()}.json`, JSON.stringify(metrics))
+//   //   if (testOngoing()) {
+//   //     setTimeout(() => {
+//   //       console.log('start updateStats ' + Date.now())
+//   //       updateStats()
+//   //       console.log('end updateStats ' + Date.now())
+//   //     }, 500)
+//   //   }
+//   // }
+//   // updateStats()
+// })().catch((e) => {
+//   console.error('Test aborted', e)
+// })
+
+main()

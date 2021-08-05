@@ -194,9 +194,13 @@ export class Peer {
     if (this.config.pingInterval) {
       const schedulePing = () =>
         setTimeout(async () => {
+          // console.log('ping')
+
           try {
             await this.ping()
           } finally {
+            // console.log('ping finally')
+
             this.pingTimeoutId = schedulePing()
           }
         }, this.config.pingInterval)
@@ -301,6 +305,7 @@ export class Peer {
   }
 
   private disconnectFrom(peerId: string, removeListener: boolean = true) {
+    console.log('-------------- Disconnecting!!!')
     this.wrtcHandler.disconnectFrom(peerId, removeListener)
     delete this.peerRelayData[peerId]
   }
@@ -1068,6 +1073,8 @@ export class Peer {
         results: [],
         future: pingFuture
       }
+
+      console.log('sending ping, ping timeout: ', this.getPingTimeout(), `peerId: ${this.peerId}`)
 
       await this.sendPacketWithData({ pingData: { pingId } }, PingMessageType, {
         expireTime: this.getPingTimeout()

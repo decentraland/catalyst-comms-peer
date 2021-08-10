@@ -4,6 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
+    "start:production": "node dist/index.js",
     "start": "tsc --watch --project tsconfig.json",
     "build": "tsc --build"
   },
@@ -19,7 +20,7 @@
     "typescript": "^4.3.5"
   },
   "dependencies": {
-    "@dcl/catalyst-peer": "file:../",
+    "@dcl/catalyst-peer": "next",
     "eventemitter3": "^4.0.7",
     "express": "^4.17.1",
     "fp-future": "^1.0.1",

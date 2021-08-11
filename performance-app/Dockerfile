@@ -17,15 +17,15 @@ RUN npm ci
 COPY . /app
 RUN npm run build
 
-# remove devDependencies, keep only used dependencies
-RUN npm ci --only=production
-
 # build the release app
 FROM node:lts
-
 
 EXPOSE 5000
 
 WORKDIR /app
 COPY --from=builder /app /app
-CMD [ "node", "run", "start", "-- TEST_ID=1 NUMBER_OF_PEERS=4" ]
+
+ENV TEST_ID=1
+ENV NUMBER_OF_PEERS=4
+
+CMD [ "npm", "run", "start:production" ]

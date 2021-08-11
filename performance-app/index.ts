@@ -14,9 +14,10 @@ import {
   PeerMessageTypes
 } from '@dcl/catalyst-peer'
 import { ChatData, CommsMessage, PositionData, ProfileData } from './messages/messages'
-// import fetch from 'node-fetch'
+import fetch from 'node-fetch'
 // import { writeFileSync } from 'fs'
 import wrtc from 'wrtc'
+import { startServer } from './test-orchestrator-server'
 // import { exit } from 'process'
 
 type Quaternion = [number, number, number, number]
@@ -25,7 +26,7 @@ const numberOfPeers = parseInt(process.env.NUMBER_OF_PEERS ?? '2')
 const testDuration = parseInt(process.env.TEST_DURATION ?? '180') * 1000
 const statsSubmitInterval = parseInt(process.env.STATS_SUBMIT_INTERVAL ?? '2000')
 const lighthouseUrl = process.env.LIGHTHOUSE_URL ?? 'http://localhost:9000'
-const statsServerUrl = process.env.STATS_SERVER_URL ?? 'http://localhost:9904'
+const statsServerUrl = process.env.STATS_SERVER_URL ?? 'orchestrator:9904'
 const testId = process.env.TEST_ID
 const pingInterval = parseInt(process.env.PING_INTERVAL ?? '200')
 
@@ -165,40 +166,40 @@ function runLoops(startingPosition: Position3D, speed: number = 5): Routine {
   }
 }
 
-// function testStarted() {
-//   let started = false
-//   let timedout = false
-//   return new Promise((resolve, reject) => {
-//     setTimeout(() => {
-//       if (!started) {
-//         timedout = true
-//         reject('Timed out waiting for test to start')
-//       }
-//     }, 600 * 1000)
+function testStarted() {
+  let started = false
+  let timedout = false
+  return new Promise((resolve, reject) => {
+    setTimeout(() => {
+      if (!started) {
+        timedout = true
+        reject('Timed out waiting for test to start')
+      }
+    }, 600 * 1000)
 
-//     const checkTestStarted = async () => {
-//       try {
-//         const testStartedResponse = await fetch(`${statsServerUrl}/test/${testId}`)
-//         if (testStartedResponse.status === 200) {
-//           const responseJson = await testStartedResponse.json()
-//           if (responseJson.started) {
-//             started = true
-//             resolve(undefined)
-//           }
-//         }
-//       } catch (e) {
-//         console.warn('Error checking if test started', e)
-//       }
+    const checkTestStarted = async () => {
+      try {
+        const testStartedResponse = await fetch(`${statsServerUrl}/test/${testId}`)
+        if (testStartedResponse.status === 200) {
+          const responseJson = await testStartedResponse.json()
+          if (responseJson.started) {
+            started = true
+            resolve(undefined)
+          }
+        }
+      } catch (e) {
+        console.warn('Error checking if test started', e)
+      }
 
-//       if (!started && !timedout) {
-//         console.log('Awaiting for test to be started...')
-//         setTimeout(checkTestStarted, 3000)
-//       }
-//     }
+      if (!started && !timedout) {
+        console.log('Awaiting for test to be started...')
+        setTimeout(checkTestStarted, 3000)
+      }
+    }
 
-//     checkTestStarted()
-//   })
-// }
+    checkTestStarted()
+  })
+}
 
 type SimulatedPeer = {
   position: Position3D
@@ -323,7 +324,9 @@ export async function createPeer() {
 }
 
 ;(async () => {
-  // if (testId) await testStarted()
+  if (testId && !Boolean(process.env.ORCHESTRATOR)) {
+    await testStarted()
+  }
 
   let lastTickStamp: number | undefined
   const peers: SimulatedPeer[] = await Promise.all(
@@ -387,3 +390,7 @@ export async function createPeer() {
 })().catch((e) => {
   console.error('Test aborted', e)
 })
+
+if (Boolean(process.env.ORCHESTRATOR)) {
+  startServer()
+}

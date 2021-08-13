@@ -17,7 +17,6 @@ import { ChatData, CommsMessage, PositionData, ProfileData } from './messages/me
 import fetch from 'node-fetch'
 // import { writeFileSync } from 'fs'
 import wrtc from 'wrtc'
-import { startServer } from './test-orchestrator-server'
 // import { exit } from 'process'
 
 type Quaternion = [number, number, number, number]
@@ -324,7 +323,7 @@ export async function createPeer() {
 }
 
 ;(async () => {
-  if (testId && !Boolean(process.env.ORCHESTRATOR)) {
+  if (testId) {
     await testStarted()
   }
 
@@ -390,7 +389,3 @@ export async function createPeer() {
 })().catch((e) => {
   console.error('Test aborted', e)
 })
-
-if (Boolean(process.env.ORCHESTRATOR)) {
-  startServer()
-}

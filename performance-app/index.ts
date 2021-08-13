@@ -243,16 +243,16 @@ async function submitStats(peer: SimulatedPeer, stats: GlobalStats) {
   const statsToSubmit = buildCatalystPeerStatsData(peer.peer)
 
   if (statsServerUrl && testId) {
-    console.log(`${testId}-peer-${peer.peer.peerId}-metrics-${Date.now()}`, JSON.stringify(statsToSubmit, null, 4))
+    // console.log(`${testId}-peer-${peer.peer.peerId}-metrics-${Date.now()}`, JSON.stringify(statsToSubmit, null, 4))
     // writeFileSync(
     //   `${testId}-peer-${peer.peer.peerId}-metrics-${Date.now()}.log`,
     //   JSON.stringify(statsToSubmit, null, 4)
     // )
-    // await fetch(`${statsServerUrl}/test/${testId}/peer/${peer.peer.peerId}/metrics`, {
-    //   method: 'PUT',
-    //   headers: { 'Content-Type': 'application/json' },
-    //   body: JSON.stringify(statsToSubmit)
-    // })
+    await fetch(`${statsServerUrl}/test/${testId}/peer/${peer.peer.peerId}/metrics`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(statsToSubmit)
+    })
   }
 }
 

@@ -15,17 +15,15 @@ import {
 } from '@dcl/catalyst-peer'
 import { ChatData, CommsMessage, PositionData, ProfileData } from './messages/messages'
 import fetch from 'node-fetch'
-// import { writeFileSync } from 'fs'
 import wrtc from 'wrtc'
-// import { exit } from 'process'
 
 type Quaternion = [number, number, number, number]
 
 const numberOfPeers = parseInt(process.env.NUMBER_OF_PEERS ?? '2')
-const testDuration = parseInt(process.env.TEST_DURATION ?? '180') * 1000
+const testDuration = parseInt(process.env.TEST_DURATION ?? '3600') * 1000
 const statsSubmitInterval = parseInt(process.env.STATS_SUBMIT_INTERVAL ?? '2000')
 const lighthouseUrl = process.env.LIGHTHOUSE_URL ?? 'http://localhost:9000'
-const statsServerUrl = process.env.STATS_SERVER_URL ?? 'orchestrator:9904'
+const statsServerUrl = process.env.STATS_SERVER_URL ?? 'http://localhost:4000'
 const testId = process.env.TEST_ID
 const pingInterval = parseInt(process.env.PING_INTERVAL ?? '200')
 
@@ -47,8 +45,6 @@ function generateToken(n: number) {
 function randomBetween(min: number, max: number) {
   return Math.random() * (max - min) + min
 }
-
-// const peerIdLength = parseInt(process.env.PEER_ID_LENGTH ?? '42') // We use a string of length 42 to emulate a ethereum address as per bandwidth
 
 if (!testId) {
   console.error('Missing parameter testId! No results will be submited to stats server')

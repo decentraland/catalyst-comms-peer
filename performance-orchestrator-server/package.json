@@ -5,7 +5,6 @@
   "main": "index.js",
   "scripts": {
     "start:production": "node dist/index.js",
-    "start": "tsc --watch --project tsconfig.json",
     "build": "tsc --build"
   },
   "author": "",

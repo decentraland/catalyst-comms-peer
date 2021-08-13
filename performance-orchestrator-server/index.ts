@@ -1,27 +1,50 @@
 import express from 'express'
-import { readFileSync } from 'fs'
 import { Server } from 'http'
 
 const port = process.env.PORT || 4000
 
-export function startServer() {
-  const app = express()
+const app = express()
 
-  app.get('/test/:testId', (req, res, next) => {
-    if (
-      req.params.testId === process.env.TEST_ID &&
-      JSON.parse(readFileSync('./test_status.json').toString()).started
-    ) {
-      res.status(200).send({ started: true })
-      return
+const startedTests = {}
+
+app.get('/test/:testId', (req, res, next) => {
+  if (startedTests[req.params.testId]?.started) {
+    res.status(200).send({ started: true })
+    return
+  }
+
+  res.send({ started: false })
+})
+
+app.post('/test/:testId/start', (req, res, next) => {
+  const time = Date.now()
+
+  if (!startedTests[req.params.testId]?.started) {
+    startedTests[req.params.testId] = {
+      started: true,
+      time
     }
 
-    res.send({ started: false })
-  })
+    res.status(200).send({ started: true, time })
+    return
+  }
 
-  app.set('port', port)
+  res.status(400).send({ message: 'Test already running' })
+})
 
-  const http = new Server(app)
+app.post('/test/:testId/stop', (req, res, next) => {
+  if (startedTests[req.params.testId]?.started) {
+    delete startedTests[req.params.testId]
 
-  http.listen(port, () => console.log(`Graph listening on port ${port}`))
-}
+    res.status(200).send({ stopped: true })
+    return
+  }
+
+  res.status(400).send({ message: 'Test not running' })
+})
+
+app.set('port', port)
+
+const http = new Server(app)
+
+http.listen(port, () => console.log(`Graph listening on port ${port}`))

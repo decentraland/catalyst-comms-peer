@@ -342,7 +342,7 @@ export class Peer {
   }
 
   awaitConnectionEstablished(timeoutMs: number = 10000): Promise<void> {
-    return this.wrtcHandler.awaitConnectionEstablished()
+    return this.wrtcHandler.awaitConnectionEstablished(timeoutMs)
   }
 
   private async retryConnection() {
@@ -472,7 +472,7 @@ export class Peer {
     return Object.keys(this.knownPeers).filter((key) => !this.wrtcHandler.hasConnectionsFor(key))
   }
 
-  async updateNetwork() {
+  async updateNetwork(event: string) {
     if (this.updatingNetwork || this.disposed) {
       return
     }
@@ -480,7 +480,7 @@ export class Peer {
     try {
       this.updatingNetwork = true
 
-      this.log(LogLevel.DEBUG, 'Updating network...')
+      this.log(LogLevel.DEBUG, `Updating network because of event "${event}"...`)
 
       this.wrtcHandler.checkConnectionsSanity()
 
@@ -1151,7 +1151,7 @@ export class Peer {
         if (islandId === this.currentIslandId) {
           if (this.isConnectedTo(peer.id)) this.disconnectFrom(peer.id)
           this.removeKnownPeer(peer.id)
-          this.triggerUpdateNetwork(`peer ${peer.id} joined island`)
+          this.triggerUpdateNetwork(`peer ${peer.id} left island`)
           this.config.eventsHandler.onPeerLeftIsland?.(peer.id)
         }
         break
@@ -1186,7 +1186,7 @@ export class Peer {
   }
 
   private triggerUpdateNetwork(event: string) {
-    this.updateNetwork().catch((e) => {
+    this.updateNetwork(event).catch((e) => {
       this.log(LogLevel.WARN, 'Error updating network after ' + event, e)
     })
   }
@@ -1225,7 +1225,7 @@ export class Peer {
           }
         } else {
           // We are going to be over connected so we trigger a delayed network update to ensure we keep below the max connections
-          setTimeout(() => this.updateNetwork(), PEER_CONSTANTS.OVERCONNECTED_NETWORK_UPDATE_DELAY)
+          setTimeout(() => this.updateNetwork('over connected'), PEER_CONSTANTS.OVERCONNECTED_NETWORK_UPDATE_DELAY)
           // This continues below
         }
       } else {

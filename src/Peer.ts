@@ -93,7 +93,7 @@ export class Peer {
   constructor(
     lighthouseUrl: string,
     _peerId?: string,
-    public callback: PacketCallback = () => { },
+    public callback: PacketCallback = () => {},
     _config: PeerConfig = {}
   ) {
     this.config = {

@@ -1,7 +1,8 @@
 on:
   pull_request:
+  workflow_call:
 
-name: CI
+name: Build and test
 jobs:
   build:
     runs-on: ubuntu-latest

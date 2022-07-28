@@ -18,9 +18,9 @@ jobs:
     needs: release
     if: ${{ success() }}
     steps:
+      - uses: actions/checkout@master
       - name: get latest release and export as GITHUB_REF
         run:  export GITHUB_REF=refs/tags/$(git tag | sort -V | tail -1)
-      - uses: actions/checkout@master
       - name: Use Node.js 14.x
         uses: actions/setup-node@v1
         with:

@@ -21,7 +21,7 @@ jobs:
     steps:
       - uses: actions/checkout@master
       - name: get latest release and export as GITHUB_REF
-        run:  echo "GITHUB_REF=refs/tags/$(git tag | sort -V | tail -1)" > $GITHUB_ENV
+        run:  echo "GIT_TAG=refs/tags/$(git tag | sort -V | tail -1)" > $GITHUB_ENV
       - name: Use Node.js 14.x
         uses: actions/setup-node@v1
         with:
@@ -35,10 +35,9 @@ jobs:
       - name: build
         run:  npm run build
       - name: Publish
-        uses: menduz/oddish-action@master
+        uses: hprivakos/oddish-action@3.0.1
         with:
           registry-url: "https://registry.npmjs.org"
           access: public
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
-          GITHUB_REF: ${{ env.GITHUB_REF }}

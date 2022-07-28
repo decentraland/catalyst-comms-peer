@@ -2,15 +2,25 @@ on:
   push:
     branches:
       - master
-  release:
-    types:
-      - created
 
 name: CI
 jobs:
+  release:
+    runs-on: ubuntu-latest
+    permissions: write-all
+    needs: build
+    steps:
+      - uses: decentraland/gh-action-release@0.3.2
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+
   build:
     runs-on: ubuntu-latest
+    needs: release
+    if: ${{ success() }}
     steps:
+      - name: get latest release and export as GITHUB_REF
+        run:  export GITHUB_REF=refs/tags/$(git tag | sort -V | tail -1)
       - uses: actions/checkout@master
       - name: Use Node.js 14.x
         uses: actions/setup-node@v1

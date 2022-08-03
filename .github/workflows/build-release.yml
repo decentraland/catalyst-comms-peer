@@ -37,7 +37,7 @@ jobs:
       - name: build
         run:  npm run build
       - name: Publish
-        uses: hprivakos/oddish-action@3.0.1
+        uses: menduz/oddish-action@master
         with:
           registry-url: "https://registry.npmjs.org"
           access: public

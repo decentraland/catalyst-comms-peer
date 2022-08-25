@@ -12,7 +12,6 @@ jobs:
       - uses: decentraland/gh-action-release@0.3.2
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
-          dry_run: true
 
   build:
     runs-on: ubuntu-latest

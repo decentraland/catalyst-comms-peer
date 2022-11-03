@@ -414,6 +414,7 @@ export class Peer {
     this.wrtcHandler.cleanConnections()
   }
 
+
   async joinRoom(roomId: string): Promise<any> {
     this.currentRooms.add(roomId)
   }

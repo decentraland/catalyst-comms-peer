@@ -366,6 +366,8 @@ export class Peer {
         for (const room of rooms) {
           await this.joinRoom(room)
         }
+
+        break
       } catch (e) {
         this.log(LogLevel.WARN, `Error while reconnecting (attempt ${i}) `, e)
         if (i >= reconnectionAttempts!) {
